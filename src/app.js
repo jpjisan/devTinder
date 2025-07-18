@@ -82,7 +82,7 @@ app.patch("/user/:userId", async (req, res) => {
     if (!isUpdateAllowed) {
       throw new Error("Invalid update fields");
     }
-    if (data.skills.length > 10) {
+    if (data.skills?.length > 10) {
       throw new Error("Skills array cannot exceed 10 items");
     }
     const user = await User.findByIdAndUpdate({ _id: userId }, data, {
@@ -93,7 +93,7 @@ app.patch("/user/:userId", async (req, res) => {
 
     res.status(200).json("User updated succesfully");
   } catch (error) {
-    // console.log("Error fetching user:", error);
+    console.log("Error fetching user:", error);
     res.status(400).send("Error updating user: " + error.message);
   }
 });
