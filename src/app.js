@@ -1,22 +1,67 @@
 const express = require("express");
 const connectDb = require("./config/dataBase");
+const bcrypt = require("bcrypt");
 const User = require("./models/user");
+const { dataValidation } = require("./utils/validation");
 const app = express();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  // console.log(req.body);
+  console.log("Received signup request with data:", req.body);
 
-  const user = new User(req.body);
   try {
+    /// data validation
+    dataValidation(req);
+
+    const {
+      firstName,
+      lastName,
+      emailId,
+      password,
+      profilePicture,
+      about,
+      skills,
+    } = req.body;
+    //password encryption
+    const passwordHash = await bcrypt.hash(password, 10);
+    console.log("Password hashed successfully", passwordHash);
+
+    /// create user
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      profilePicture,
+      about,
+      skills,
+    });
     await user.save();
     console.log(user);
+    res.send("User created successfully");
   } catch (error) {
     console.log("Error saving user:", error);
     res.status(400).send("Error creating user: " + error.message);
   }
+});
+app.post("/login", async (req, res) => {
+  console.log("Received login request with data:", req.body);
 
-  res.send("User created successfully");
+  try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid email or password");
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Invalid email or password");
+    }
+    res.send("Login successful");
+  } catch (error) {
+    console.log("Error in login request:", error);
+    res.status(400).send("Error logging in: " + error.message);
+  }
 });
 app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;

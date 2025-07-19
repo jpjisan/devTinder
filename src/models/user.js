@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     lastName: {
       type: String,
       required: true,
-      maxLenth: 50,
+      maxLength: 50,
     },
     emailId: {
       type: String,
@@ -19,11 +19,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error("Invalid email format");
-        }
-      },
     },
     age: {
       type: Number,
@@ -42,11 +37,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      validate(value) {
-        if (validator.isStrongPassword(value)) {
-          throw new Error("Password must be strong");
-        }
-      },
+      // validate(value) {
+      //   if (validator.isStrongPassword(value)) {
+      //     throw new Error("Password must be strong");
+      //   }
+      // },
     },
     about: {
       type: String,
