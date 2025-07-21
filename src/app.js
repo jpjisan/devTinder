@@ -2,9 +2,15 @@ const express = require("express");
 const connectDb = require("./config/dataBase");
 const bcrypt = require("bcrypt");
 const User = require("./models/user");
+const jwt = require("jsonwebtoken");
+const userAuth = require("./middlewares/auth");
+
 const { dataValidation } = require("./utils/validation");
+const cookieParser = require("cookie-parser");
+const e = require("express");
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   console.log("Received signup request with data:", req.body);
@@ -53,15 +59,37 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid email or password");
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    // check password`
+    const isPasswordValid = await user.validatePassword(password);
+    if (isPasswordValid) {
+      // create token
+      const token = await user.getJWT();
+      console.log("Token created successfully:", token);
+
+      //set token to cookie
+      res.cookie("token", token);
+      res.send("Login successful");
+    } else {
       throw new Error("Invalid email or password");
     }
-    res.send("Login successful");
   } catch (error) {
     console.log("Error in login request:", error);
     res.status(400).send("Error logging in: " + error.message);
   }
+});
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    // console.log("Fetching user profile...", _id);
+    res.send(user);
+  } catch (error) {
+    res.status(400).send("Error fetching profile: " + error.message);
+  }
+});
+app.post("/sentRequest", userAuth, async (req, res) => {
+  const user = req.user;
+
+  res.send(user.firstName + " sent request  successfully");
 });
 app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;
@@ -93,7 +121,7 @@ app.get("/feed", async (req, res) => {
   }
 });
 app.delete("/user", async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
 
   const userId = req.body.userId;
   console.log(userId);
