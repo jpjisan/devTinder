@@ -1,4 +1,5 @@
 const validator = require("validator");
+const bcrypt = require("bcrypt");
 const dataValidation = (req) => {
   const { firstName, lastName, emailId, password } = req.body;
   if (!firstName || !lastName) {
@@ -9,5 +10,20 @@ const dataValidation = (req) => {
     throw new Error("Password must be at least 8 characters long");
   }
 };
+const validateEditProfile = (req) => {
+  const ALLOWED_FIELDS = [
+    "firstName",
+    "lastName",
+    "age",
+    "about",
+    "profilePicture",
+    "skills",
+  ];
+  const isEditAllowed = Object.keys(req.body).every((key) =>
+    ALLOWED_FIELDS.includes(key)
+  );
 
-module.exports = { dataValidation };
+  return isEditAllowed;
+};
+
+module.exports = { dataValidation, validateEditProfile };

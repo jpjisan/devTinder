@@ -1,175 +1,99 @@
 const express = require("express");
 const connectDb = require("./config/dataBase");
-const bcrypt = require("bcrypt");
-const User = require("./models/user");
-const jwt = require("jsonwebtoken");
-const userAuth = require("./middlewares/auth");
 
-const { dataValidation } = require("./utils/validation");
 const cookieParser = require("cookie-parser");
-const e = require("express");
+
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.post("/signup", async (req, res) => {
-  console.log("Received signup request with data:", req.body);
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+// app.use("/", Router);
 
-  try {
-    /// data validation
-    dataValidation(req);
+// app.get("/user", async (req, res) => {
+//   const userEmail = req.body.emailId;
+//   console.log("Fetching user with email:", userEmail);
 
-    const {
-      firstName,
-      lastName,
-      emailId,
-      password,
-      profilePicture,
-      about,
-      skills,
-    } = req.body;
-    //password encryption
-    const passwordHash = await bcrypt.hash(password, 10);
-    console.log("Password hashed successfully", passwordHash);
+//   try {
+//     const user = await User.findOne({
+//       emailId: userEmail,
+//     });
+//     if (user) {
+//       res.status(200).json(user);
+//     } else {
+//       res.status(404).send("User not found");
+//     }
+//   } catch (error) {
+//     console.log("Error fetching user:", error);
+//   }
+// });
+// app.get("/feed", async (req, res) => {
+//   try {
+//     const users = await User.find({});
+//     if (users) {
+//       res.status(200).json(users);
+//     } else {
+//       res.status(404).send("User not found");
+//     }
+//   } catch (error) {
+//     console.log("Error fetching user:", error);
+//   }
+// });
+// app.delete("/user", async (req, res) => {
+//   // console.log(req.body);
 
-    /// create user
-    const user = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: passwordHash,
-      profilePicture,
-      about,
-      skills,
-    });
-    await user.save();
-    console.log(user);
-    res.send("User created successfully");
-  } catch (error) {
-    console.log("Error saving user:", error);
-    res.status(400).send("Error creating user: " + error.message);
-  }
-});
-app.post("/login", async (req, res) => {
-  console.log("Received login request with data:", req.body);
+//   const userId = req.body.userId;
+//   console.log(userId);
 
-  try {
-    const { emailId, password } = req.body;
-    const user = await User.findOne({ emailId: emailId });
-    if (!user) {
-      throw new Error("Invalid email or password");
-    }
-    // check password`
-    const isPasswordValid = await user.validatePassword(password);
-    if (isPasswordValid) {
-      // create token
-      const token = await user.getJWT();
-      console.log("Token created successfully:", token);
+//   try {
+//     const user = await User.findByIdAndDelete(userId);
+//     res.status(200).json("User deleted succesfully");
+//   } catch (error) {
+//     console.log("Error fetching user:", error);
+//   }
+// });
+// app.patch("/user/:userId", async (req, res) => {
+//   const userId = req.params?.userId;
+//   const data = req.body;
+//   console.log(userId);
+//   console.log("Updating user with data:", data);
 
-      //set token to cookie
-      res.cookie("token", token);
-      res.send("Login successful");
-    } else {
-      throw new Error("Invalid email or password");
-    }
-  } catch (error) {
-    console.log("Error in login request:", error);
-    res.status(400).send("Error logging in: " + error.message);
-  }
-});
-app.get("/profile", userAuth, async (req, res) => {
-  try {
-    const user = req.user;
-    // console.log("Fetching user profile...", _id);
-    res.send(user);
-  } catch (error) {
-    res.status(400).send("Error fetching profile: " + error.message);
-  }
-});
-app.post("/sentRequest", userAuth, async (req, res) => {
-  const user = req.user;
+//   try {
+//     const ALLOWED_FIELDS = [
+//       "firstName",
+//       "lastName",
+//       "age",
+//       "about",
+//       "profilePicture",
+//       "skills",
+//     ];
 
-  res.send(user.firstName + " sent request  successfully");
-});
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
-  console.log("Fetching user with email:", userEmail);
+//     const isUpdateAllowed = Object.keys(data).every((key) =>
+//       ALLOWED_FIELDS.includes(key)
+//     );
+//     if (!isUpdateAllowed) {
+//       throw new Error("Invalid update fields");
+//     }
+//     if (data.skills?.length > 10) {
+//       throw new Error("Skills array cannot exceed 10 items");
+//     }
+//     const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+//       returnDocument: "after",
+//       runValidators: true,
+//     });
+//     console.log("user updated:", user);
 
-  try {
-    const user = await User.findOne({
-      emailId: userEmail,
-    });
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(404).send("User not found");
-    }
-  } catch (error) {
-    console.log("Error fetching user:", error);
-  }
-});
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    if (users) {
-      res.status(200).json(users);
-    } else {
-      res.status(404).send("User not found");
-    }
-  } catch (error) {
-    console.log("Error fetching user:", error);
-  }
-});
-app.delete("/user", async (req, res) => {
-  // console.log(req.body);
-
-  const userId = req.body.userId;
-  console.log(userId);
-
-  try {
-    const user = await User.findByIdAndDelete(userId);
-    res.status(200).json("User deleted succesfully");
-  } catch (error) {
-    console.log("Error fetching user:", error);
-  }
-});
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId;
-  const data = req.body;
-  console.log(userId);
-  console.log("Updating user with data:", data);
-
-  try {
-    const ALLOWED_FIELDS = [
-      "firstName",
-      "lastName",
-      "age",
-      "about",
-      "profilePicture",
-      "skills",
-    ];
-
-    const isUpdateAllowed = Object.keys(data).every((key) =>
-      ALLOWED_FIELDS.includes(key)
-    );
-    if (!isUpdateAllowed) {
-      throw new Error("Invalid update fields");
-    }
-    if (data.skills?.length > 10) {
-      throw new Error("Skills array cannot exceed 10 items");
-    }
-    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
-      returnDocument: "after",
-      runValidators: true,
-    });
-    console.log("user updated:", user);
-
-    res.status(200).json("User updated succesfully");
-  } catch (error) {
-    console.log("Error fetching user:", error);
-    res.status(400).send("Error updating user: " + error.message);
-  }
-});
+//     res.status(200).json("User updated succesfully");
+//   } catch (error) {
+//     console.log("Error fetching user:", error);
+//     res.status(400).send("Error updating user: " + error.message);
+//   }
+// });
 
 connectDb()
   .then(() => {
