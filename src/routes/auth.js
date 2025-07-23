@@ -16,6 +16,8 @@ authRouter.post("/signup", async (req, res) => {
       firstName,
       lastName,
       emailId,
+      age,
+      gender,
       password,
       profilePicture,
       about,
@@ -29,6 +31,8 @@ authRouter.post("/signup", async (req, res) => {
     const user = new User({
       firstName,
       lastName,
+      age,
+      gender,
       emailId,
       password: passwordHash,
       profilePicture,
