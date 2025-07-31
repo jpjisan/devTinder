@@ -15,6 +15,8 @@ const validateEditProfile = (req) => {
     "firstName",
     "lastName",
     "age",
+    "gender",
+
     "about",
     "profilePicture",
     "skills",

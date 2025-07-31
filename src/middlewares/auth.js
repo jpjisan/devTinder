@@ -3,7 +3,7 @@ const User = require("../models/user");
 const userAuth = async (req, res, next) => {
   const { token } = req.cookies;
   if (!token) {
-    return res.status(401).send("No token provided");
+    return res.status(401).send("No token provided, Please login  ");
   }
   try {
     const decodedObj = await jwt.verify(token, "devTinder69");

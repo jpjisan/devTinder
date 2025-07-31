@@ -72,7 +72,7 @@ requestRouter.post(
       }
       connectionRequest.status = status;
       await connectionRequest.save();
-      res.status(200).send({
+      res.status(200).json({
         message: `Connection request ${status} successfully`,
         connectionRequest,
       });

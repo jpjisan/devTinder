@@ -39,9 +39,14 @@ authRouter.post("/signup", async (req, res) => {
       about,
       skills,
     });
-    await user.save();
-    console.log(user);
-    res.send("User created successfully");
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+    console.log("Token created successfully:", token);
+
+    //set token to cookie
+    res.cookie("token", token);
+    console.log(savedUser);
+    res.json({ massage: "User created successfully", savedUser });
   } catch (error) {
     console.log("Error saving user:", error);
     res.status(400).send("Error creating user: " + error.message);
@@ -66,13 +71,13 @@ authRouter.post("/login", async (req, res) => {
 
       //set token to cookie
       res.cookie("token", token);
-      res.send("Login successful");
+      res.status(200).send(user);
     } else {
       throw new Error("Invalid email or password");
     }
   } catch (error) {
     console.log("Error in login request:", error);
-    res.status(400).send("Error logging in: " + error.message);
+    res.status(400).send("Error: " + error.message);
   }
 });
 authRouter.post("/logout", (req, res) => {

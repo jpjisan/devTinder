@@ -9,11 +9,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       maxLenth: 50,
+      capitalize: true,
     },
     lastName: {
       type: String,
       required: true,
       maxLength: 50,
+      capitalize: true,
     },
     emailId: {
       type: String,

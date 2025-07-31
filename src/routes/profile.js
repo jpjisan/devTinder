@@ -11,7 +11,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
     // console.log("Fetching user profile...", user._id);
-    const isPasswordValid = await user.vali;
+    // const isPasswordValid = await user.vali;
     res.send(user);
   } catch (error) {
     res.status(400).send("Error fetching profile: " + error.message);
@@ -29,9 +29,9 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     });
     await user.save();
     console.log("Profile updated successfully", user);
-    res.send("Profile updated successfully");
+    res.json(user);
   } catch (error) {
-    res.status(400).send("Error validating profile edit: " + error.message);
+    res.status(400).json("Error " + error.message);
   }
 });
 profileRouter.patch("/profile/change-password", userAuth, async (req, res) => {
