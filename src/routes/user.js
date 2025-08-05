@@ -71,15 +71,40 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     });
     // console.log("Hide connections:", hideConnections);
 
-    const users = await User.find({
-      $and: [
-        { _id: { $nin: Array.from(hideConnections) } },
-        { _id: { $ne: loggedInUser._id } },
-      ],
-    })
-      .select(SafeData)
-      .skip(skip)
-      .limit(limit);
+    // random users
+    const users = await User.aggregate([
+      {
+        $match: {
+          _id: {
+            $nin: Array.from(hideConnections).map(
+              (id) => new mongoose.Types.ObjectId(id)
+            ),
+            $ne: loggedInUser._id,
+          },
+        },
+      },
+      { $sample: { size: limit } }, // Randomly select 'limit' users
+      {
+        $project: {
+          firstName: 1,
+          lastName: 1,
+          profilePicture: 1,
+          about: 1,
+          skills: 1,
+        },
+      },
+    ]);
+
+    // static users by order db
+    // const users = await User.find({
+    //   $and: [
+    //     { _id: { $nin: Array.from(hideConnections) } },
+    //     { _id: { $ne: loggedInUser._id } },
+    //   ],
+    // })
+    //   .select(SafeData)
+    //   .skip(skip)
+    //   .limit(limit);
     // console.log("Users for feed:", users);
 
     res.status(200).json(users);

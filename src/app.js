@@ -15,14 +15,14 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-console.log(process.env);
+// console.log(process.env);
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 // app.use("/", Router);
-
+//
 // app.get("/user", async (req, res) => {
 //   const userEmail = req.body.emailId;
 //   console.log("Fetching user with email:", userEmail);
