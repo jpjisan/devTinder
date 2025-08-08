@@ -12,9 +12,14 @@ const cors = require("cors");
 
 require("dotenv").config();
 const app = express();
+// Allow specific origins
+const allowedOrigins = [
+  "https://devpalace.netlify.app",
+  "http://localhost:5173", // For development
+];
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: "https://devpalace.netlify.app", credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 // console.log(process.env);
 
 app.use("/", authRouter);
@@ -107,7 +112,7 @@ connectDb()
   .then(() => {
     console.log("Database connected successfully");
     app.listen(process.env.PORT, (req, res) => {
-      console.log(`Server is running on port ${process.env.PORT} `);
+      console.log(`Server is running on port ${process.env.PORT || 3000} `);
     });
   })
   .catch((err) => {

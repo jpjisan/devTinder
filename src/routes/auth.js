@@ -50,7 +50,7 @@ authRouter.post("/signup", async (req, res) => {
       sameSite: "None", // if frontend and backend are different domains
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
     });
-    console.log(savedUser);
+    // console.log(savedUser);
     res.json({ massage: "User created successfully", savedUser });
   } catch (error) {
     console.log("Error saving user:", error);
@@ -63,15 +63,27 @@ authRouter.post("/login", async (req, res) => {
 
   try {
     const { emailId, password } = req.body;
-    const user = await User.findOne({ emailId: emailId });
-    if (!user) {
+    const userData = await User.findOne({ emailId: emailId });
+    if (!userData) {
       throw new Error("Invalid email or password");
     }
+    const user = {
+      _id: userData._id,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      // emailId: userData.emailId, // Optional - include if needed
+      age: userData.age,
+      gender: userData.gender,
+      profilePicture: userData.profilePicture,
+      // interests: userData.interests,
+      // Add other non-sensitive fields
+      // Exclude: password, resetPasswordToken, etc.
+    };
     // check password`
-    const isPasswordValid = await user.validatePassword(password);
+    const isPasswordValid = await userData.validatePassword(password);
     if (isPasswordValid) {
       // create token
-      const token = await user.getJWT();
+      const token = await userData.getJWT();
       console.log("Token created successfully:", token);
 
       //set token to cookie
