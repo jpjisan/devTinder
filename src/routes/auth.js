@@ -44,7 +44,12 @@ authRouter.post("/signup", async (req, res) => {
     console.log("Token created successfully:", token);
 
     //set token to cookie
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true, // required if using https
+      sameSite: "None", // if frontend and backend are different domains
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+    });
     console.log(savedUser);
     res.json({ massage: "User created successfully", savedUser });
   } catch (error) {
@@ -70,7 +75,12 @@ authRouter.post("/login", async (req, res) => {
       console.log("Token created successfully:", token);
 
       //set token to cookie
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true, // required if using https
+        sameSite: "None", // if frontend and backend are different domains
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+      });
       res.status(200).send(user);
     } else {
       throw new Error("Invalid email or password");
