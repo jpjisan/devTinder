@@ -46,8 +46,8 @@ authRouter.post("/signup", async (req, res) => {
     //set token to cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true, // required if using https
-      sameSite: "None", // if frontend and backend are different domains
+      secure: process.env.NODE_ENV === 'production', // Only secure in production
+      sameSite: process.env.NODE_ENV === 'production' ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
     });
     // console.log(savedUser);
@@ -89,8 +89,8 @@ authRouter.post("/login", async (req, res) => {
       //set token to cookie
       res.cookie("token", token, {
         httpOnly: true,
-        secure: true, // required if using https
-        sameSite: "None", // if frontend and backend are different domains
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? "None" : "Lax",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
       });
       res.status(200).send(user);
@@ -104,7 +104,10 @@ authRouter.post("/login", async (req, res) => {
 });
 authRouter.post("/logout", (req, res) => {
   res.cookie("token", "", {
-    expires: new Date(Date.now()),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? "None" : "Lax",
+    expires: new Date(0),
   });
   res.send("Logout successful");
 });
