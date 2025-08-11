@@ -11,6 +11,7 @@ const http = require("http");
 const user = require("./models/user");
 const cors = require("cors");
 const initializedSocket = require("./utils/socket");
+const chatRouter = require("./routes/chat");
 
 require("dotenv").config();
 const app = express();
@@ -31,6 +32,7 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
+app.use("/", chatRouter);
 
 connectDb()
   .then(() => {
