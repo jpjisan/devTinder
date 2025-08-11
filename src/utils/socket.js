@@ -10,7 +10,7 @@ const initializedSocket = (server) => {
     cors: {
       // origin: "http://localhost:5173",
       // origin: "https://devpalace.netlify.app",
-      origin: allowedOrigins,
+      origin: "http://localhost:5173",
     },
   });
 
@@ -21,24 +21,24 @@ const initializedSocket = (server) => {
       const roomId = [userId, targetUserId].sort().join("_");
       socket.userId = userId;
       onlineUsers.set(userId, socket.id);
-      
+
       console.log(firstName, " joined RoomId ", roomId);
       socket.join(roomId);
-      
+
       // Notify target user that this user is online
       socket.to(roomId).emit("user-online", { userId });
     });
-    
+
     socket.on("user-typing", ({ targetUserId }) => {
       const roomId = [socket.userId, targetUserId].sort().join("_");
       socket.to(roomId).emit("user-typing", { userId: socket.userId });
     });
-    
+
     socket.on("user-stopped-typing", ({ targetUserId }) => {
       const roomId = [socket.userId, targetUserId].sort().join("_");
       socket.to(roomId).emit("user-stopped-typing", { userId: socket.userId });
     });
-    
+
     socket.on("message-read", ({ messageId, targetUserId }) => {
       const roomId = [socket.userId, targetUserId].sort().join("_");
       socket.to(roomId).emit("message-read", { messageId });
@@ -82,9 +82,9 @@ const initializedSocket = (server) => {
       if (socket.userId) {
         onlineUsers.delete(socket.userId);
         // Notify all rooms this user was in that they're offline
-        socket.broadcast.emit("user-offline", { 
-          userId: socket.userId, 
-          lastSeen: new Date() 
+        socket.broadcast.emit("user-offline", {
+          userId: socket.userId,
+          lastSeen: new Date(),
         });
       }
     });
